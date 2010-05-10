@@ -1,5 +1,6 @@
 % ECGSYN
 
+% Version 0.5: 3 Lead ECG; Polar Plot
 % Version 0.4: 2 Lead ECG
 % Version 0.3: Baseline drift 
 % Version 0.2: X,Y,Z phase Sim
@@ -24,15 +25,23 @@ configEcgSyn(1);
 configEcgSyn(2); 
 [T2,Y2] = ode45(@ecgsynSolver, [t0 tf], [x0 y0 z0], options);
 
-subplot(2,1,1);  
+subplot(3,1,1);  
 plot(T1, Y1(:,3),'.-');
-grid on; title('Lead 1');
-xlabel('Time \rightarrow '); ylabel('z(t) \rightarrow ');
+xlabel('Time \rightarrow '); ylabel('milivolts (mv) \rightarrow ');
+grid on; title('Lead 1'); %ylim([-1 1]);
 
-subplot(2,1,2); 
+subplot(3,1,2); 
 plot(T2, Y2(:,3),'.-');
-grid on; title('Lead 2'); 
-xlabel('Time \rightarrow '); ylabel('z(t) \rightarrow ');
+xlabel('Time \rightarrow '); ylabel('milivolts (mv) \rightarrow ');
+grid on; title('Lead 2'); %ylim([-1 1]);
+
+subplot(3,1,3); 
+plot(T1, cos (2*pi/3 - acos(Y1(:,3))),'.-');
+xlabel('Time \rightarrow '); ylabel('milivolts (mv) \rightarrow ');
+grid on; title('Lead 3'); %ylim([-1 1]);
+
+figure;
+polar(acos(Y1(:,3)),Y1(:,3));
 
 % legend('state x','state y', 'state z'); 
 % text(-pi/4,sin(-pi/4),'\leftarrow
