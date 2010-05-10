@@ -1,0 +1,130 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN">
+<html xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+      <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      -->
+      <title>ecgsyn03</title>
+      <meta name="generator" content="MATLAB 7.6">
+      <meta name="date" content="2010-03-22">
+      <meta name="m-file" content="ecgsyn03"><style>
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head>
+   <body>
+      <div class="content"><pre class="codeinput"><span class="comment">% ECGSYN</span>
+
+<span class="comment">% Version 0.3: Baseline drift that gave the R wave.</span>
+<span class="comment">% Version 0.2: 3D Sim</span>
+<span class="comment">% Version 0.1: Crude Simulation</span>
+<span class="comment">% 2d Phase and State Trajectories plot</span>
+
+clear <span class="string">all</span>;
+clc;
+</pre><pre class="codeinput">t0 = 0; tf = 1;
+x0 = -0.1; y0 = 0; z0 = 0;
+options = odeset(<span class="string">'OutputFcn'</span>,@odephas3);
+
+figure;
+[T,Y] = ode45(@ecgsynSolver, [t0 tf], [x0 y0 z0], options);
+
+figure;
+plot(T,Y(:,1),<span class="string">'-'</span>, T,Y(:,2),<span class="string">'-'</span>, T,Y(:,3),<span class="string">'.-'</span>);
+title(<span class="string">'State Trajectories as a function of Time'</span>);
+legend(<span class="string">'state x'</span>,<span class="string">'state y'</span>, <span class="string">'state z'</span>); grid <span class="string">on</span>;
+xlabel(<span class="string">'Time \rightarrow '</span>); ylabel(<span class="string">'x(t), y(t) &amp; z(t) \rightarrow '</span>);
+<span class="comment">% text(-pi/4,sin(-pi/4),'\leftarrow</span>
+<span class="comment">% sin(-\pi\div4)','HorizontalAlignment','left')</span>
+</pre><img vspace="5" hspace="5" src="ecgsyn03_01.png"> <img vspace="5" hspace="5" src="ecgsyn03_02.png"> <p class="footer"><br>
+            Published with MATLAB&reg; 7.6<br></p>
+      </div>
+      <!--
+##### SOURCE BEGIN #####
+% ECGSYN
+
+% Version 0.3: Baseline drift that gave the R wave.
+% Version 0.2: 3D Sim
+% Version 0.1: Crude Simulation
+% 2d Phase and State Trajectories plot
+
+clear all;
+clc;
+
+%%
+t0 = 0; tf = 1;
+x0 = -0.1; y0 = 0; z0 = 0;
+options = odeset('OutputFcn',@odephas3);
+
+figure;
+[T,Y] = ode45(@ecgsynSolver, [t0 tf], [x0 y0 z0], options);
+
+figure;
+plot(T,Y(:,1),'-', T,Y(:,2),'-', T,Y(:,3),'.-');
+title('State Trajectories as a function of Time');
+legend('state x','state y', 'state z'); grid on;
+xlabel('Time \rightarrow '); ylabel('x(t), y(t) & z(t) \rightarrow ');
+% text(-pi/4,sin(-pi/4),'\leftarrow
+% sin(-\pi\div4)','HorizontalAlignment','left')
+
+##### SOURCE END #####
+-->
+   </body>
+</html>

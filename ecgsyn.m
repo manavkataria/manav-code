@@ -1,5 +1,7 @@
 % ECGSYN
 
+% Version 0.6: 3 Vector CardioGram: Polar & Time Series
+%              Also explored; lead2 derived from lead1.
 % Version 0.5: 3 Lead ECG (realistic); Polar Plot; 
 % Version 0.4: 2 Lead ECG
 % Version 0.3: Baseline drift 
@@ -11,7 +13,7 @@ clear all;
 clc;
 
 %%
-t0 = 0; tf = 1;
+t0 = 0; tf = 3;
 x0 = -0.1; y0 = 0; z0 = 0;
 options = odeset('OutputFcn',@odephas3);
 
@@ -27,22 +29,31 @@ configEcgSyn(2);
 
 subplot(3,1,1);  
 plot(T1, Y1(:,3),'.-');
+legend('Lead 1','Location','SouthWest');
 xlabel('Time \rightarrow '); ylabel('milivolts (mv) \rightarrow ');
-grid on; title('Lead 1'); %ylim([-1 1]);
+grid on; title('Lead 1'); ylim([-1 1]);
 
 subplot(3,1,2); 
-plot(T2, Y2(:,3),'.-');
+plot(T2, Y2(:,3),'.-', T1,Y1(:,3));
+legend('Lead 2 derived', 'Lead 1','Location','SouthWest');
 xlabel('Time \rightarrow '); ylabel('milivolts (mv) \rightarrow ');
-grid on; title('Lead 2'); %ylim([-1 1]);
+grid on; title('Lead 2'); ylim([-1 1]);
 
+display 'Derive Lead 3';
 subplot(3,1,3); 
 plot(T1, cos (2*pi/3 - acos(Y1(:,3))),'.-');
+legend('Lead 3 derived','Location','SouthWest');
 xlabel('Time \rightarrow '); ylabel('milivolts (mv) \rightarrow ');
 grid on; title('Lead 3'); %ylim([-1 1]);
 
-figure;
-polar(acos(Y1(:,3)),Y1(:,3));
+%% Vector CardioGram
+figure; subplot(2,1,1);
+display 'Vector CardioGram: Polar';
+polar(acos(Y1(:,3)),Y1(:,3),'--r');
+grid on; title('Vector CardioGram: Polar'); 
 
-% legend('state x','state y', 'state z'); 
-% text(-pi/4,sin(-pi/4),'\leftarrow
-% sin(-\pi\div4)','HorizontalAlignment','left')
+subplot(2,1,2);
+plot(T1, acos(Y1(:,3)),'.-');
+display 'Vector CardioGram: Time Series';
+grid on; title('Vector CardioGram: Time Series'); 
+xlabel('Time \rightarrow '); ylabel('angle (radian) \rightarrow ');
