@@ -1,6 +1,6 @@
 % ECGSYN
 
-% Version 0.5: 3 Lead ECG; Polar Plot
+% Version 0.5: 3 Lead ECG (realistic); Polar Plot; 
 % Version 0.4: 2 Lead ECG
 % Version 0.3: Baseline drift 
 % Version 0.2: X,Y,Z phase Sim
