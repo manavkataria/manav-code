@@ -16,7 +16,7 @@ F = 1;          w = 2*pi*F;
 A = 0.15;       F2 = 0.01;
 
 dy        = zeros(3,1);       
-deviation = 1 - sqrt(y(1)*y(1) + y(2)*y(2)); 
+deviation = 1 - sqrt(y(1)*y(1) + y(2)*y(2)); %from radius
 
 theta     = atan2(y(2),y(1));
 
