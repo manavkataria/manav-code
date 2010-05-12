@@ -1,0 +1,269 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN">
+<html xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+      <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      -->
+      <title>ecgsyn</title>
+      <meta name="generator" content="MATLAB 7.6">
+      <meta name="date" content="2010-05-11">
+      <meta name="m-file" content="ecgsyn"><style>
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head>
+   <body>
+      <div class="content">
+         <h2>Contents</h2>
+         <div>
+            <ul>
+               <li><a href="#3">calculate Lead 3</a></li>
+               <li><a href="#5">Vector CardioGram</a></li>
+            </ul>
+         </div><pre class="codeinput"><span class="comment">% ECGSYN</span>
+
+<span class="comment">% Version 0.7: ECG Validation: Attemtps</span>
+<span class="comment">%	       using datafile: ecg_normal.gif</span>
+<span class="comment">% Version 0.6: 3 Vector CardioGram: Polar &amp; Time Series</span>
+<span class="comment">%              Also explored; lead2 derived from lead1.</span>
+<span class="comment">% Version 0.5: 3 Lead ECG (realistic); Polar Plot;</span>
+<span class="comment">% Version 0.4: 2 Lead ECG</span>
+<span class="comment">% Version 0.3: Baseline drift</span>
+<span class="comment">% Version 0.2: X,Y,Z phase Sim</span>
+<span class="comment">% Version 0.1: Crude Simulation</span>
+<span class="comment">% X,Y Phase and State Trajectories plot; No Z.</span>
+
+clear <span class="string">all</span>;
+clc;
+</pre><pre class="codeinput">t0 = 0; tf = 1;
+x0 = -0.1; y0 = 0; z0 = 0;
+options = odeset(<span class="string">'OutputFcn'</span>,@odephas3);
+datapts = 500;
+tspan   = [t0:tf/(datapts-1):tf];
+
+<span class="keyword">global</span> thetai
+<span class="keyword">global</span> heighti
+<span class="keyword">global</span> widthi
+
+configEcgSyn(1);
+[T1,Y1] = ode45(@ecgsynSolver, tspan, [x0 y0 z0], options);
+
+configEcgSyn(2);
+[T2,Y2] = ode45(@ecgsynSolver, tspan, [x0 y0 z0], options);
+
+subplot(3,1,1);
+plot(T1, Y1(:,3));
+legend(<span class="string">'Lead 1'</span>,<span class="string">'Location'</span>,<span class="string">'SouthWest'</span>);
+xlabel(<span class="string">'Time \rightarrow '</span>); ylabel(<span class="string">'milivolts (mv) \rightarrow '</span>);
+grid <span class="string">on</span>; grid <span class="string">minor</span>; title(<span class="string">'Lead 1'</span>); ylim([-0.5 0.5]);
+
+subplot(3,1,2);
+plot(T2, Y2(:,3), T1, Y1(:,3));
+legend(<span class="string">'Lead 2'</span>, <span class="string">'Lead 1'</span>,<span class="string">'Location'</span>,<span class="string">'SouthWest'</span>);
+xlabel(<span class="string">'Time \rightarrow '</span>); ylabel(<span class="string">'milivolts (mv) \rightarrow '</span>);
+grid <span class="string">on</span>; grid <span class="string">minor</span>; title(<span class="string">'Lead 2'</span>); ylim([-0.5 0.5]);
+</pre><pre class="codeoutput">Configuring lead 1 - Normal (lesson3:ecg_normal.gif)
+Configuring lead 2 - Normal (lesson3:ecg_normal.gif)
+</pre><img vspace="5" hspace="5" src="ecgsyn_01.png"> <h2>calculate Lead 3<a name="3"></a></h2><pre class="codeinput">T3 = T1;
+<span class="comment">% To determine whether angle subtended by dipole wrt horizontal is positive</span>
+<span class="comment">% or negative; Cos(60-angle) is the lead2 value at horizontal</span>
+<span class="comment">% zeroComponentonY2 = cos (pi/3);</span>
+<span class="comment">% for i=1:length(T3)</span>
+<span class="comment">%     if (Y2(i,3) &gt; zeroComponentonY2*Y1(i,3))</span>
+<span class="comment">%         Y3(i) = cos (2*pi/3 + acos(Y1(i,3)));</span>
+<span class="comment">%     else</span>
+<span class="comment">%         Y3(i) = cos (2*pi/3 - acos(Y1(i,3)));</span>
+<span class="comment">%     end</span>
+<span class="comment">% end</span>
+<span class="comment">% plot(T3, Y3, T2, Y2(:,3), T1, Y1(:,3));</span>
+</pre><pre class="codeinput">display <span class="string">'Derive Lead 3'</span>;
+subplot(3,1,3);
+<span class="comment">% from Lead 2:</span>
+plot(T2, cos (pi/3 - acos(Y2(:,3)))-0.866, T2, Y2(:,3), T1, Y1(:,3));
+
+<span class="comment">% from Lead 1:</span>
+<span class="comment">% plot(T1, cos (2*pi/3 - acos(Y1(:,3)))-0.866, T2, Y2(:,3), T1, Y1(:,3));</span>
+
+<span class="comment">% figure;</span>
+<span class="comment">% Lead 3 theta should be derived from either Y1 or Y2 or a mix of both?</span>
+<span class="comment">% plot(T1,cos (2*pi/3 - acos(Y1(:,3))), T1, cos (pi/3 - acos(Y2(:,3))),</span>
+<span class="comment">% T1,(cos (2*pi/3 - acos(Y1(:,3)))+cos (pi/3 - acos(Y2(:,3))))/2);</span>
+legend(<span class="string">'Lead 3 derived'</span>,<span class="string">'Lead 2'</span>,<span class="string">'Lead 1'</span>,<span class="string">'Location'</span>,<span class="string">'SouthWest'</span>);
+xlabel(<span class="string">'Time \rightarrow '</span>); ylabel(<span class="string">'milivolts (mv) \rightarrow '</span>);
+grid <span class="string">on</span>; grid <span class="string">minor</span>; title(<span class="string">'Lead 3'</span>); ylim([-0.5 0.5]);
+</pre><pre class="codeoutput">Derive Lead 3
+</pre><img vspace="5" hspace="5" src="ecgsyn_02.png"> <h2>Vector CardioGram<a name="5"></a></h2><pre class="codeinput">figure; subplot(2,1,1);
+display <span class="string">'Vector CardioGram: Polar'</span>;
+polar(pi/3 - acos(Y2(:,3)),Y2(:,3),<span class="string">'--r'</span>);
+
+<span class="comment">% polar(acos(Y1(:,3)),Y1(:,3),'--r');</span>
+grid <span class="string">on</span>; title(<span class="string">'Vector CardioGram: Polar'</span>);
+
+subplot(2,1,2);
+plot(T2, pi/3 - acos(Y2(:,3)),<span class="string">'.-'</span>);
+<span class="comment">%plot(T1, acos(Y1(:,3)),'.-');</span>
+display <span class="string">'Vector CardioGram: Time Series'</span>;
+grid <span class="string">on</span>; title(<span class="string">'Vector CardioGram: Time Series'</span>);
+xlabel(<span class="string">'Time \rightarrow '</span>); ylabel(<span class="string">'angle (radian) \rightarrow '</span>);
+</pre><pre class="codeoutput">Vector CardioGram: Polar
+Vector CardioGram: Time Series
+</pre><img vspace="5" hspace="5" src="ecgsyn_03.png"> <p class="footer"><br>
+            Published with MATLAB&reg; 7.6<br></p>
+      </div>
+      <!--
+##### SOURCE BEGIN #####
+% ECGSYN
+
+% Version 0.7: ECG Validation: Attemtps 
+%	       using datafile: ecg_normal.gif
+% Version 0.6: 3 Vector CardioGram: Polar & Time Series
+%              Also explored; lead2 derived from lead1.
+% Version 0.5: 3 Lead ECG (realistic); Polar Plot; 
+% Version 0.4: 2 Lead ECG
+% Version 0.3: Baseline drift 
+% Version 0.2: X,Y,Z phase Sim
+% Version 0.1: Crude Simulation
+% X,Y Phase and State Trajectories plot; No Z.
+
+clear all;
+clc;
+
+%%
+t0 = 0; tf = 1;
+x0 = -0.1; y0 = 0; z0 = 0;
+options = odeset('OutputFcn',@odephas3);
+datapts = 500;
+tspan   = [t0:tf/(datapts-1):tf];
+
+global thetai
+global heighti
+global widthi
+
+configEcgSyn(1); 
+[T1,Y1] = ode45(@ecgsynSolver, tspan, [x0 y0 z0], options);
+
+configEcgSyn(2); 
+[T2,Y2] = ode45(@ecgsynSolver, tspan, [x0 y0 z0], options);
+
+subplot(3,1,1);  
+plot(T1, Y1(:,3));
+legend('Lead 1','Location','SouthWest');
+xlabel('Time \rightarrow '); ylabel('milivolts (mv) \rightarrow ');
+grid on; grid minor; title('Lead 1'); ylim([-0.5 0.5]);
+
+subplot(3,1,2); 
+plot(T2, Y2(:,3), T1, Y1(:,3));
+legend('Lead 2', 'Lead 1','Location','SouthWest');
+xlabel('Time \rightarrow '); ylabel('milivolts (mv) \rightarrow ');
+grid on; grid minor; title('Lead 2'); ylim([-0.5 0.5]);
+
+%% calculate Lead 3
+
+T3 = T1;
+% To determine whether angle subtended by dipole wrt horizontal is positive
+% or negative; Cos(60-angle) is the lead2 value at horizontal 
+% zeroComponentonY2 = cos (pi/3); 
+% for i=1:length(T3) 
+%     if (Y2(i,3) > zeroComponentonY2*Y1(i,3))
+%         Y3(i) = cos (2*pi/3 + acos(Y1(i,3)));
+%     else
+%         Y3(i) = cos (2*pi/3 - acos(Y1(i,3)));
+%     end
+% end
+% plot(T3, Y3, T2, Y2(:,3), T1, Y1(:,3));
+
+%%
+
+display 'Derive Lead 3';
+subplot(3,1,3); 
+% from Lead 2:
+plot(T2, cos (pi/3 - acos(Y2(:,3)))-0.866, T2, Y2(:,3), T1, Y1(:,3));
+
+% from Lead 1:
+% plot(T1, cos (2*pi/3 - acos(Y1(:,3)))-0.866, T2, Y2(:,3), T1, Y1(:,3));
+
+% figure;
+% Lead 3 theta should be derived from either Y1 or Y2 or a mix of both?
+% plot(T1,cos (2*pi/3 - acos(Y1(:,3))), T1, cos (pi/3 - acos(Y2(:,3))), 
+% T1,(cos (2*pi/3 - acos(Y1(:,3)))+cos (pi/3 - acos(Y2(:,3))))/2);
+legend('Lead 3 derived','Lead 2','Lead 1','Location','SouthWest');
+xlabel('Time \rightarrow '); ylabel('milivolts (mv) \rightarrow ');
+grid on; grid minor; title('Lead 3'); ylim([-0.5 0.5]);
+
+
+%% Vector CardioGram
+figure; subplot(2,1,1);
+display 'Vector CardioGram: Polar';
+polar(pi/3 - acos(Y2(:,3)),Y2(:,3),'REPLACE_WITH_DASH_DASHr');
+
+% polar(acos(Y1(:,3)),Y1(:,3),'REPLACE_WITH_DASH_DASHr');
+grid on; title('Vector CardioGram: Polar'); 
+
+subplot(2,1,2);
+plot(T2, pi/3 - acos(Y2(:,3)),'.-');
+%plot(T1, acos(Y1(:,3)),'.-');
+display 'Vector CardioGram: Time Series';
+grid on; title('Vector CardioGram: Time Series'); 
+xlabel('Time \rightarrow '); ylabel('angle (radian) \rightarrow ');
+
+##### SOURCE END #####
+-->
+   </body>
+</html>

@@ -78,13 +78,16 @@ grid on; grid minor; title('Lead 3'); ylim([-0.5 0.5]);
 
 
 %% Vector CardioGram
-% figure; subplot(2,1,1);
-% display 'Vector CardioGram: Polar';
+figure; subplot(2,1,1);
+display 'Vector CardioGram: Polar';
+polar(pi/3 - acos(Y2(:,3)),Y2(:,3),'--r');
+
 % polar(acos(Y1(:,3)),Y1(:,3),'--r');
-% grid on; title('Vector CardioGram: Polar'); 
-% 
-% subplot(2,1,2);
-% plot(T1, acos(Y1(:,3)),'.-');
-% display 'Vector CardioGram: Time Series';
-% grid on; title('Vector CardioGram: Time Series'); 
-% xlabel('Time \rightarrow '); ylabel('angle (radian) \rightarrow ');
+grid on; title('Vector CardioGram: Polar'); 
+
+subplot(2,1,2);
+plot(T2, pi/3 - acos(Y2(:,3)),'.-');
+%plot(T1, acos(Y1(:,3)),'.-');
+display 'Vector CardioGram: Time Series';
+grid on; title('Vector CardioGram: Time Series'); 
+xlabel('Time \rightarrow '); ylabel('angle (radian) \rightarrow ');
