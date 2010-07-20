@@ -1,6 +1,7 @@
 % ECGSYN
 
-% Version 0.81: VCG and Validation thru Linear Matrix transformation
+% Version 0.82: Verification by Reconstruction
+% Version 0.81: VCG and Validation thru trignometry and geometry
 % Version 0.7 (deprecated): ECG Validation: Attemtps 
 %              using datafile: ecg_normal.gif
 % Version 0.6 (deprecated): 3 Vector CardioGram: Polar & Time Series
@@ -29,7 +30,7 @@ global widthi
 configEcgSyn(1); 
 [T1,Y1] = ode45(@ecgsynSolver, tspan, [x0 y0 z0], options);
 
-configEcgSyn(2); 
+configEcgSyn(21); 
 [T2,Y2] = ode45(@ecgsynSolver, tspan, [x0 y0 z0], options);
 
 subplot(3,1,1);  
@@ -39,55 +40,72 @@ xlabel('Time \rightarrow '); ylabel('milivolts (mv) \rightarrow ');
 grid on; grid minor; title('Lead 1'); ylim([-0.5 0.5]);
 
 subplot(3,1,2); 
-plot(T2, Y2(:,3), T1, Y1(:,3));
-legend('Lead 2', 'Lead 1','Location','SouthWest');
+plot(T1, Y1(:,3), T2, Y2(:,3));
+legend('Lead 1', 'Lead 2','Location','SouthWest');
 xlabel('Time \rightarrow '); ylabel('milivolts (mv) \rightarrow ');
 grid on; grid minor; title('Lead 2'); ylim([-0.5 0.5]);
 
-%% calculate Cardiac Dipole
-% Linear Transformation Matrix - M = [1 0; -1/sqroot(3) 2/sqrt(3)]
-
-display 'Derive Dipole';
+%% Derive Lead 3
+% As L1,L2,L3 are component vectors of the same vector L (dipole). 
+% And as we have L1+L3=L2
 display 'Derive Lead 3';
+% Y3 = zeros(datapts,1);  % Lead 3 (derived)
 
-r3 = sqrt(3);       %root3
-M = [1 0; -1/r3 2/r3];
-D = zeros(datapts,4);
-Y3 = zeros(datapts,1);
+Y3 = Y2(:,3) - Y1(:,3);         %just the z-value of Y1 and Y2
+
+subplot(3,1,3); 
+plot(T1, Y1(:,3), T2, Y2(:,3), T1, Y3(:,1));
+legend('Lead 1','Lead 2','Lead 3 derived','Location','SouthWest');
+xlabel('Time \rightarrow '); ylabel('milivolts (mv) \rightarrow ');
+grid on; grid minor; title('Lead 3'); ylim([-0.5 0.5]);
+title('Lead3');
+
+%% Plot L1,L2,L3 together
+figure;
+plot(T1, Y1(:,3), T2, Y2(:,3), T1, Y3(:,1));
+legend('Lead 1','Lead 2','Lead 3 derived','Location','SouthWest');
+xlabel('Time \rightarrow '); ylabel('milivolts (mv) \rightarrow ');
+grid on; grid minor; title('Lead 3'); ylim([-0.5 0.5]);
+title('Lead3');
+
+%% calculate Cardiac Dipole
+display 'Derive Dipole';
+
+r3 = sqrt(3);           % sqrt(3)
+D = zeros(datapts,2);   % Dipole 
+R = zeros(datapts,2);   % Reconstruction
 
 for i=1:datapts 
-     D(i,1:2) = M*[Y1(i);Y2(i)];        % (x,y)
-     D(i,3) = D(i,1)^2+D(i,2)^2;        % Magnitude
-     D(i,4) = atan2(D(i,2),D(i,1))*180/pi; % Angle
-     Y3(:,i) = -D(i,3)/2*cos(D(i,4)-r3/2*sin(D(i,4)));
+	D(i,1) = atan(1/r3*(2*Y2(i,3)/Y1(i,3) -1));  % Angle in Radians
+    D(i,2) = Y1(i,3)/cos(D(i,1));                % Magnitude
+    R(i,1) = D(i,2)*cos(D(i,1));                 % Reconstruction Lead1
+    R(i,2) = D(i,2)*cos(pi/3-D(i,1));            % Reconstruction Lead2
 end
-%%
-subplot(3,1,3); 
-plot(T1, Y3(:,1), T2, Y2(:,3), T1, Y1(:,3));
-legend('Lead 3 derived','Lead 2','Lead 1','Location','SouthWest');
-xlabel('Time \rightarrow '); ylabel('milivolts (mv) \rightarrow ');
-grid on; grid minor; title('Lead 3'); ylim([-0.5 0.5]);
-title('Lead3');
-
-%%
-figure;
-plot(T1, Y3(:,1), T2, Y2(:,3), T1, Y1(:,3));
-legend('Lead 3 derived','Lead 2','Lead 1','Location','SouthWest');
-xlabel('Time \rightarrow '); ylabel('milivolts (mv) \rightarrow ');
-grid on; grid minor; title('Lead 3'); ylim([-0.5 0.5]);
-title('Lead3');
 
 %% Vector CardioGram
-
 figure; subplot(2,1,1);
 display 'Vector CardioGram: Polar';
-polar(D(:,4),D(:,3));
+polar(D(:,1),D(:,2));
 grid on; title('Vector CardioGram: Polar'); 
 
 subplot(2,1,2);
-plot(T1,D(:,3),T1,D(:,4));
-legend('Magnitude','Angle');
+plot(T1,D(:,1),T1,D(:,2));
+legend('Angle','Magnitude');
 title('Dipole');
 display 'Vector CardioGram: Time Series';
 grid on; title('Vector CardioGram: Time Series'); 
 xlabel('Time \rightarrow '); ylabel('angle (radian) \rightarrow ');
+
+%% Verification 
+display 'Verification by Reconstruction';
+figure; subplot(2,1,1);
+plot(T1,R(:,1),'rx',T1,Y1(:,3));
+legend('Lead 1 derived','Lead 1 observed','Location','SouthWest');
+grid on; title('Lead1: Verification by Reconstruction'); 
+
+subplot(2,1,2);
+plot(T1,R(:,2),'rx',T1,Y2(:,3));
+legend('Lead 2 derived','Lead 2 observed','Location','NorthWest');
+grid on; title('Lead2: Verification by Reconstruction'); 
+
+
