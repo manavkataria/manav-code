@@ -1,5 +1,7 @@
 % ECGSYN
 
+% Version 0.83: Theta verified by trignometry and Matrix Projections
+%               and Magnitude Verified by two different formulas
 % Version 0.82: Verification by Reconstruction
 % Version 0.81: VCG and Validation thru trignometry and geometry
 % Version 0.7 (deprecated): ECG Validation: Attemtps 
@@ -46,13 +48,11 @@ xlabel('Time \rightarrow '); ylabel('milivolts (mv) \rightarrow ');
 grid on; grid minor; title('Lead 2'); ylim([-0.5 0.5]);
 
 %% Derive Lead 3
-% As L1,L2,L3 are component vectors of the same vector L (dipole). 
+% As L1,L2,L3 are component vectors of the same vector D (dipole). 
 % And as we have L1+L3=L2
-display 'Derive Lead 3';
-% Y3 = zeros(datapts,1);  % Lead 3 (derived)
-
 Y3 = Y2(:,3) - Y1(:,3);         %just the z-value of Y1 and Y2
 
+display 'Derive Lead 3';
 subplot(3,1,3); 
 plot(T1, Y1(:,3), T2, Y2(:,3), T1, Y3(:,1));
 legend('Lead 1','Lead 2','Lead 3 derived','Location','SouthWest');
@@ -65,8 +65,8 @@ figure;
 plot(T1, Y1(:,3), T2, Y2(:,3), T1, Y3(:,1));
 legend('Lead 1','Lead 2','Lead 3 derived','Location','SouthWest');
 xlabel('Time \rightarrow '); ylabel('milivolts (mv) \rightarrow ');
-grid on; grid minor; title('Lead 3'); ylim([-0.5 0.5]);
-title('Lead3');
+grid on; grid minor; ylim([-0.5 0.5]);
+title('Leads 1,2,3');
 
 %% calculate Cardiac Dipole
 display 'Derive Dipole';
@@ -76,8 +76,15 @@ D = zeros(datapts,2);   % Dipole
 R = zeros(datapts,2);   % Reconstruction
 
 for i=1:datapts 
-	D(i,1) = atan(1/r3*(2*Y2(i,3)/Y1(i,3) -1));  % Angle in Radians
+% vv Just for comparison: atan Vs atan2    
+    Z(i,1) = atan(1/r3*(2*Y2(i,3)/Y1(i,3) -1));  % Angle in Radians
+    Z(i,2) = Y1(i,3)/cos(D(i,1));                % Magnitude   
+% ^^ Just for comparison: atan Vs atan2    
+    
+	D(i,1) = atan2(1/r3*(2*Y2(i,3)-Y1(i,3)),Y1(i,3));  % Angle in Radians
+%	D(i,1) = atan(1/r3*(2*Y2(i,3)/Y1(i,3) -1));  % Angle in Radians
     D(i,2) = Y1(i,3)/cos(D(i,1));                % Magnitude
+%    D(i,2) = 2/r3*sqrt(Y1(i,3)^2+Y2(i,3)^2-Y1(i,3)*Y2(i,3)); % Magnitude by another method
     R(i,1) = D(i,2)*cos(D(i,1));                 % Reconstruction Lead1
     R(i,2) = D(i,2)*cos(pi/3-D(i,1));            % Reconstruction Lead2
 end
@@ -88,6 +95,7 @@ display 'Vector CardioGram: Polar';
 polar(D(:,1),D(:,2));
 grid on; title('Vector CardioGram: Polar'); 
 
+%%
 subplot(2,1,2);
 plot(T1,D(:,1),T1,D(:,2));
 legend('Angle','Magnitude');
@@ -108,4 +116,10 @@ plot(T1,R(:,2),'rx',T1,Y2(:,3));
 legend('Lead 2 derived','Lead 2 observed','Location','NorthWest');
 grid on; title('Lead2: Verification by Reconstruction'); 
 
+%% Just for comparison: atan Vs atan2    
+%figure;
+hold on;
+plot(T1,Z(:,1),T1,D(:,1));
+legend('atan','atan2','Location','NorthWest');
+grid on; title('Dipole Angle'); 
 
