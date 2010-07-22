@@ -33,41 +33,22 @@ global widthi
 configEcgSyn(1); 
 [T1,Y1] = ode45(@ecgsynSolver, tspan, [x0 y0 z0], options);
 
-configEcgSyn(21); 
+configEcgSyn(2); 
 [T2,Y2] = ode45(@ecgsynSolver, tspan, [x0 y0 z0], options);
-
-subplot(3,1,1);  
-plot(T1, Y1(:,3));
-legend('Lead 1','Location','SouthWest');
-xlabel('Time \rightarrow '); ylabel('milivolts (mv) \rightarrow ');
-grid on; grid minor; title('Lead 1'); ylim([-0.5 0.5]);
-
-subplot(3,1,2); 
-plot(T1, Y1(:,3), T2, Y2(:,3));
-legend('Lead 1', 'Lead 2','Location','SouthWest');
-xlabel('Time \rightarrow '); ylabel('milivolts (mv) \rightarrow ');
-grid on; grid minor; title('Lead 2'); ylim([-0.5 0.5]);
 
 %% Derive Lead 3
 % As L1,L2,L3 are component vectors of the same vector D (dipole). 
 % And as we have L1+L3=L2
 Y3 = Y2(:,3) - Y1(:,3);         %just the z-value of Y1 and Y2
-
 display 'Derive Lead 3';
-subplot(3,1,3); 
-plot(T1, Y1(:,3), T2, Y2(:,3), T1, Y3(:,1));
-legend('Lead 1','Lead 2','Lead 3 derived','Location','SouthWest');
-xlabel('Time \rightarrow '); ylabel('milivolts (mv) \rightarrow ');
-grid on; grid minor; title('Lead 3'); ylim([-0.5 0.5]);
-title('Lead3');
 
 %% Plot L1,L2,L3 together
 figure;
 plot(T1, Y1(:,3), T2, Y2(:,3), T1, Y3(:,1));
 legend('Lead 1','Lead 2','Lead 3 derived','Location','SouthWest');
 xlabel('Time \rightarrow '); ylabel('milivolts (mv) \rightarrow ');
-grid on; grid minor; ylim([-0.5 0.5]);
-title('Leads 1,2,3');
+grid on; grid minor; ylim([-0.1 0.2]);
+title('Leads 1, 2 with 3-derived');
 
 %% calculate Cardiac Dipole
 display 'Derive Dipole';
