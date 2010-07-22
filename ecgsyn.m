@@ -2,6 +2,7 @@
 
 % Version 0.83: Theta verified by trignometry and Matrix Projections
 %               and Magnitude Verified by two different formulas
+%              (cleanup) 
 % Version 0.82: Verification by Reconstruction
 % Version 0.81: VCG and Validation thru trignometry and geometry
 % Version 0.7 (deprecated): ECG Validation: Attemtps 
@@ -75,37 +76,31 @@ r3 = sqrt(3);           % sqrt(3)
 D = zeros(datapts,2);   % Dipole 
 R = zeros(datapts,2);   % Reconstruction
 
-for i=1:datapts 
-% vv Just for comparison: atan Vs atan2    
-    Z(i,1) = atan(1/r3*(2*Y2(i,3)/Y1(i,3) -1));  % Angle in Radians
-    Z(i,2) = Y1(i,3)/cos(D(i,1));                % Magnitude   
-% ^^ Just for comparison: atan Vs atan2    
-    
-	D(i,1) = atan2(1/r3*(2*Y2(i,3)-Y1(i,3)),Y1(i,3));  % Angle in Radians
-%	D(i,1) = atan(1/r3*(2*Y2(i,3)/Y1(i,3) -1));  % Angle in Radians
+for i=1:datapts    
+    D(i,1) = atan2(1/r3*(2*Y2(i,3)-Y1(i,3)),Y1(i,3));  % Angle in Radians
     D(i,2) = Y1(i,3)/cos(D(i,1));                % Magnitude
-%    D(i,2) = 2/r3*sqrt(Y1(i,3)^2+Y2(i,3)^2-Y1(i,3)*Y2(i,3)); % Magnitude by another method
     R(i,1) = D(i,2)*cos(D(i,1));                 % Reconstruction Lead1
     R(i,2) = D(i,2)*cos(pi/3-D(i,1));            % Reconstruction Lead2
+
+%   Magnitude by another method
+%   D(i,2) = 2/r3*sqrt(Y1(i,3)^2+Y2(i,3)^2-Y1(i,3)*Y2(i,3)); 
 end
 
 %% Vector CardioGram
 figure; subplot(2,1,1);
-display 'Vector CardioGram: Polar';
+display '(Dipole) Vector CardioGram: Polar';
 polar(D(:,1),D(:,2));
-grid on; title('Vector CardioGram: Polar'); 
+grid on; title('(Dipole) Vector CardioGram: Polar'); 
 
-%%
+display '(Dipole) Vector CardioGram: Time Series';
 subplot(2,1,2);
 plot(T1,D(:,1),T1,D(:,2));
-legend('Angle','Magnitude');
-title('Dipole');
-display 'Vector CardioGram: Time Series';
-grid on; title('Vector CardioGram: Time Series'); 
+legend('Angle','Magnitude','Location','SouthWest');
+grid on; title('(Dipole) Vector CardioGram: Time Series'); 
 xlabel('Time \rightarrow '); ylabel('angle (radian) \rightarrow ');
 
 %% Verification 
-display 'Verification by Reconstruction';
+display 'Verification by Reconstruction of Lead 1 and Lead 2';
 figure; subplot(2,1,1);
 plot(T1,R(:,1),'rx',T1,Y1(:,3));
 legend('Lead 1 derived','Lead 1 observed','Location','SouthWest');
@@ -115,11 +110,3 @@ subplot(2,1,2);
 plot(T1,R(:,2),'rx',T1,Y2(:,3));
 legend('Lead 2 derived','Lead 2 observed','Location','NorthWest');
 grid on; title('Lead2: Verification by Reconstruction'); 
-
-%% Just for comparison: atan Vs atan2    
-%figure;
-hold on;
-plot(T1,Z(:,1),T1,D(:,1));
-legend('atan','atan2','Location','NorthWest');
-grid on; title('Dipole Angle'); 
-
