@@ -2,6 +2,11 @@ function plotATM(matName,infoName,signal)
 %
 % Version 1.0: Original form physioTools
 % Version 1.1: plotATM.m modified to plot specific signals, 6th Sep 2010
+% Version 1.2: plotATM.m Verify Einthoven's Triangle / 2 lead info sufficient.
+%              Calculates the error of L2 obtained from L2 = L1 + L3, vs
+%              Real world recorded L2; And AVL, AVR, AVF computed from
+%              Enthoven's model Vs. Real world Recordings - Physiobank's PTBDB
+%              6th Sep 2010
 %
 % usage: plotATM('RECORDm.mat', 'RECORDm.info',[1 3 5])
 % Plots only signal number 1, 3 and 5.
@@ -69,11 +74,23 @@ function plotATM(matName,infoName,signal)
        if (signalIndex > length(signal)), break; end;              
   end
   x = (1:size(val,2))*interval;
-  valeinth = valfiltered(1,:)+valfiltered(3,:);
-   plot(x',valfiltered'); 
-  for i=1:length(signal)
-            labels{i}=strcat(signalName{i},' (',units{i},')'); 
-  end
+
+%  plot(x',valfiltered'); 
+%% Verifying Einthoven's Theory: Triangle Vs Real world signals 
+  % test using: plotATM('s0014lrem.mat','sc.info',[1 2 3 4 5 6]);
+  % Compute Derived Leads:
+  valeinth(1,:) = valfiltered(1,:)+valfiltered(3,:);  %Lead2
+  valeinth(2,:) = -(valfiltered(1,:)+valfiltered(2,:))/2;  %Lead aVR
+  valeinth(3,:) = (valfiltered(1,:)-valfiltered(3,:))/2;  %Lead aVL
+  valeinth(4,:) = (valfiltered(2,:)+valfiltered(3,:))/2;  %Lead aVF
+  
+  % Compute Errors Real - Derived:
+  figure; plot(x',(valfiltered(2,:) - valeinth(1,:))','r'); % Error for Lead 2;
+  figure; plot(x',(valfiltered(4,:) - valeinth(2,:))','r'); % Error for Lead aVR;
+  figure; plot(x',(valfiltered(5,:) - valeinth(3,:))','r'); % Error for Lead aVL;
+  figure; plot(x',(valfiltered(6,:) - valeinth(4,:))','r'); % Error for Lead aVF;
+
+  for i=1:length(signal), labels{i}=strcat(signalName{i},' (',units{i},')'); end
   legend(labels);
   xlabel('Time (sec)');
 end
