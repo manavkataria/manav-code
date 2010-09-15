@@ -1,4 +1,4 @@
-function plotATM(matName,infoName,signal)
+function [valfiltered x] = plotATM(matName,infoName,signal)
 %
 % Version 1.0: Original form physioTools
 % Version 1.1: plotATM.m modified to plot specific signals, 6th Sep 2010
@@ -75,21 +75,7 @@ function plotATM(matName,infoName,signal)
   end
   x = (1:size(val,2))*interval;
 
-%  plot(x',valfiltered'); 
-%% Verifying Einthoven's Theory: Triangle Vs Real world signals 
-  % test using: plotATM('s0014lrem.mat','sc.info',[1 2 3 4 5 6]);
-  % Compute Derived Leads:
-  valeinth(1,:) = valfiltered(1,:)+valfiltered(3,:);  %Lead2
-  valeinth(2,:) = -(valfiltered(1,:)+valfiltered(2,:))/2;  %Lead aVR
-  valeinth(3,:) = (valfiltered(1,:)-valfiltered(3,:))/2;  %Lead aVL
-  valeinth(4,:) = (valfiltered(2,:)+valfiltered(3,:))/2;  %Lead aVF
-  
-  % Compute Errors Real - Derived:
-  figure; plot(x',(valfiltered(2,:) - valeinth(1,:))','r'); % Error for Lead 2;
-  figure; plot(x',(valfiltered(4,:) - valeinth(2,:))','r'); % Error for Lead aVR;
-  figure; plot(x',(valfiltered(5,:) - valeinth(3,:))','r'); % Error for Lead aVL;
-  figure; plot(x',(valfiltered(6,:) - valeinth(4,:))','r'); % Error for Lead aVF;
-
+  plot(x',valfiltered'); 
   for i=1:length(signal), labels{i}=strcat(signalName{i},' (',units{i},')'); end
   legend(labels);
   xlabel('Time (sec)');

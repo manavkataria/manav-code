@@ -2,9 +2,9 @@ function configEcgSyn(lead)
 % Configures: Model Parameters thetai, widthi, heighti according to LEAD
 % configuration
 
-global thetai
-global heighti  % Z position of each attractor 
-global widthi   % Guassian Width of each attractor
+global thetai   % Centroid / x/y position of attractor
+global heighti  % Amplitude (Zposition) of each attractor 
+global widthi   % Related to Width of each Gaussian attractor
 
 if (lead==1)
     display 'Configuring lead 1 - Normal (lesson3:ecg_normal.gif)';
